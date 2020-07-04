@@ -1,5 +1,6 @@
 # Predict the best DNA sequence for a given AA sequence
 # Uses trained .h5 model
+# Input is list of AA sequences, output is optimized DNA sequences
 
 import collections
 import os
