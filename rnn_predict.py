@@ -23,8 +23,6 @@ os.chdir('/mnt/c/python_work/')
 
 model = load_model('rnn_final_model.h5')
 
-# print(model.summary())
-
 with open('aa_tokenizer.json') as f:
     aa_json = json.load(f)
 
@@ -35,7 +33,10 @@ with open('dna_tokenizer.json') as f:
 
 dna_tokenizer = tokenizer_from_json(dna_json)
 
-aa_list = ['MEDICINALCHEMISTRYZ']
+with open('IgG1.txt') as f:
+    aa_item = f.read()
+
+aa_list = [aa_item]
 
 def encrypt(string,length):
     return ' '.join(string[i:i+length] for i in range(0,len(string),length))
@@ -66,4 +67,3 @@ tmp_x = pad(preproc_aa, 8801)
 tmp_x = tmp_x.reshape((-1, 8801))
 
 print(logits_to_text(model.predict(tmp_x[:1])[0], dna_tokenizer))
-
