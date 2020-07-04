@@ -68,7 +68,7 @@ for sequence in dna_seq:
     test_total = [test_total[i] + test[i] for i in range(len(test_total))]
     print(test_total)
 
-    # If all 6 tests succeed, the DNA sequence and corresponding AA sequence are added to new lists. 
+    # If all 7 tests succeed, the DNA sequence and corresponding AA sequence are added to new lists. 
     if test == [0,0,0,0,0,0,0]:
         dna_seq_new.append(str(sequence))
         aa_seq_new.append(str(single_aa_seq))
