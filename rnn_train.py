@@ -1,3 +1,7 @@
+# Train a recurrent neural network using Chinese hamster DNA and AA sequences
+# Based on tommytracy's neural network for English to French translation
+# https://github.com/tommytracey/AIND-Capstone/blob/master/machine_translation.ipynb
+
 import collections
 import os
 import helper
@@ -24,8 +28,6 @@ aa_list_pre = list(my_dict.values())
 
 dna_list = dna_list_pre[:20]
 aa_list = aa_list_pre[:20]
-
-# aa_test = aa_list_pre[0]
 
 aa_length = max([len(sequence) for sequence in aa_list])
 dna_length = max([len(sequence) for sequence in dna_list])
