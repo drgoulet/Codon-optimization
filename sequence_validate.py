@@ -1,13 +1,13 @@
+# Purpose: Import fasta file containing list of DNA sequence, verify DNA and corresponding AA sequences, output verified sequences as json.
+# Dennis R. Goulet
+# 17 May 2020
+
 import json
 import numpy as np
 import pandas as pd
 from Bio import SeqIO 
 import random
 from collections import OrderedDict
-
-# Purpose: Import fasta file containing list of DNA sequence, verify DNA and corresponding AA sequences, output verified sequences as json.
-# Dennis R. Goulet
-# 17 May 2020
 
 # Initialize lists and define acceptable DNA bases and amino acids.
 dna_seq = []
