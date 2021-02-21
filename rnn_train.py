@@ -1,151 +1,113 @@
-# Train a recurrent neural network using Chinese hamster DNA and AA sequences
-# Based on tommytracy's neural network for English to French translation
-# https://github.com/tommytracey/AIND-Capstone/blob/master/machine_translation.ipynb
+# Train a recurrent neural network for codon optimization in CHO cells
+# Based on Chinese hamster DNA and AA sequences
+# Dennis R. Goulet
+# First upload to Github: 03 July 2020
 
-import collections
 import os
-import helper
-import numpy as np
 import json
-import numpy
+import io
+import pickle
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.models import Model, Sequential
-from keras.layers import GRU, Input, Dense, TimeDistributed, Activation, RepeatVector, Bidirectional, Dropout, LSTM
+from keras.models import Sequential
+from keras.layers import GRU, Dense, TimeDistributed, Bidirectional, Dropout
 from keras.layers.embeddings import Embedding
 from keras.optimizers import Adam
 from keras.losses import sparse_categorical_crossentropy
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 
-os.chdir('/mnt/c/python_work/')
-
-with open('cho_dict.json') as f:
-    my_dict = json.load(f)
-
-dna_list_pre = list(my_dict.keys())
-aa_list_pre = list(my_dict.values())
-
-dna_list = dna_list_pre[:20]
-aa_list = aa_list_pre[:20]
-
-aa_length = max([len(sequence) for sequence in aa_list])
-dna_length = max([len(sequence) for sequence in dna_list])
-
-print(len(dna_list))
-print(len(aa_list))
-print(aa_length)
-print(dna_length)
-
+# Encrypt DNA and AA sequences into individuals words (codons and residues) by adding spaces
 def encrypt(string,length):
     return ' '.join(string[i:i+length] for i in range(0,len(string),length))
 
-aa_spaces = []
-for aa_seq in aa_list:
-    aa_current = encrypt(aa_seq,1)
-    aa_spaces.append(aa_current)
-
-dna_spaces = []
-for dna_seq in dna_list:
-    dna_current = encrypt(dna_seq,3)
-    dna_spaces.append(dna_current)
-
-print(aa_spaces)
-print(dna_spaces)
-
-# aa_space_length = max([len(sequence) for sequence in aa_spaces])
-# print(aa_space_length)
-
-# dna_space_length = max([len(sequence) for sequence in dna_spaces])
-# print(dna_space_length)
-
-# for sample_i in range(5):
-#     print('English sample {}:  {}'.format(sample_i + 1, dna_spaces[sample_i]))
-#     print('French sample {}:  {}\n'.format(sample_i + 1, aa_spaces[sample_i]))
-
-aa_counter = collections.Counter([word for sentence in aa_spaces for word in sentence.split()])
-dna_counter = collections.Counter([word for sentence in dna_spaces for word in sentence.split()])
-
-print('{} aa words.'.format(len([word for sentence in aa_spaces for word in sentence.split()])))
-print('{} unique aa words.'.format(len(aa_counter)))
-print('10 most common aa words:')
-print('"' + '" "'.join(list(zip(*aa_counter.most_common(10)))[0]) + '"')
-
-print('{} dna words.'.format(len([word for sentence in dna_spaces for word in sentence.split()])))
-print('{} unique dna words.'.format(len(dna_counter)))
-print('10 most common dna words:')
-print('"' + '" "'.join(list(zip(*dna_counter.most_common(10)))[0]) + '"')
-
+# Tokenize DNA and AA sequences
 def tokenize(x):
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(x)
     return tokenizer.texts_to_sequences(x), tokenizer
 
+# Pad sequences if they are shorter than the max sequence length
 def pad(x, length=None):
     return pad_sequences(x, maxlen=length, padding='post')
 
+# Combine tokenization and padding into one preprocessing function
 def preprocess(x, y):
     preprocess_x, x_tk = tokenize(x)
     preprocess_y, y_tk = tokenize(y)
-
     preprocess_x = pad(preprocess_x)
     preprocess_y = pad(preprocess_y)
-
     preprocess_y = preprocess_y.reshape(*preprocess_y.shape, 1)
 
     return preprocess_x, preprocess_y, x_tk, y_tk
 
-preproc_aa, preproc_dna, aa_tokenizer, dna_tokenizer = preprocess(aa_spaces, dna_spaces)
-
-max_aa_len = preproc_aa.shape[1]
-max_dna_len = preproc_dna.shape[1]
-aa_size = len(aa_tokenizer.word_index)
-dna_size = len(dna_tokenizer.word_index)
-
-print("Max aa length:", max_aa_len)
-print("Max dna length:", max_dna_len)
-print("AA vocab size:", aa_size)
-print("DNA vocab size:", dna_size)
-
-# print(aa_spaces,dna_spaces)
-
-def logits_to_text(logits, tokenizer):
-    index_to_words = {id: word for word, id in tokenizer.word_index.items()}
-    index_to_words[0] = '<PAD>'
-
-    return ' '.join([index_to_words[prediction] for prediction in np.argmax(logits, 1)])
-
+# Add desired layers to RNN model
 def model_embed(input_shape, output_sequence_length, aa_vocab_size, dna_vocab_size):
     learning_rate = 0.005
-
     model = Sequential()
-    model.add(Embedding(aa_vocab_size, 256, input_length=input_shape[1], input_shape=input_shape[1:]))
-    model.add(Bidirectional(GRU(64, return_sequences=True)))
-    model.add(TimeDistributed(Dense(512, activation='relu')))
-    model.add(Dropout(0.5))
+    model.add(Embedding(aa_vocab_size, 128, input_length=input_shape[1], input_shape=input_shape[1:],mask_zero=True))
+    model.add(Bidirectional(GRU(16, return_sequences=True)))
+    model.add(TimeDistributed(Dense(128, activation='relu')))
+    model.add(Dropout(0.3))
     model.add(TimeDistributed(Dense(dna_vocab_size, activation='softmax')))
-
     model.compile(loss=sparse_categorical_crossentropy, optimizer=Adam(learning_rate), metrics=['accuracy'])
 
     return model
 
+# cd to appropriate directory
+os.chdir('/mnt/c/RNN')
+
+# Read in dictionary of matched DNA, AA sequences
+with open('chinese_hamster_dictionary.json') as f:
+    dna_aa_dict = json.load(f)
+
+# Make separate lists for the 30,000 DNA, AA training sequences (previously randomized)
+dna_list_pre = list(dna_aa_dict.keys())
+aa_list_pre = list(dna_aa_dict.values())
+dna_list = dna_list_pre[:30000]
+aa_list = aa_list_pre[:30000]
+
+# Encrypt DNA, AA sequences into separate 'words' by adding spaces every 3 or 1 characters
+aa_spaces = []
+for aa_seq in aa_list:
+    aa_current = encrypt(aa_seq,1)
+    aa_spaces.append(aa_current)
+dna_spaces = []
+for dna_seq in dna_list:
+    dna_current = encrypt(dna_seq,3)
+    dna_spaces.append(dna_current)
+
+# Preprocess DNA and AA sequences (tokenize and pad)
+preproc_aa, preproc_dna, aa_tokenizer, dna_tokenizer = preprocess(aa_spaces, dna_spaces)
+
+# Export DNA and AA tokenizers, which will be used when predicting codon optimized sequence
+aa_tokenizer_json = aa_tokenizer.to_json()
+with io.open('aa_tokenizer.json','w', encoding='utf-8') as f:
+    f.write(json.dumps(aa_tokenizer_json, ensure_ascii=False))
+
+dna_tokenizer_json = dna_tokenizer.to_json()
+with io.open('dna_tokenizer.json','w', encoding='utf-8') as f:
+    f.write(json.dumps(dna_tokenizer_json, ensure_ascii=False))
+
+# Ensure correct dimensionality
 tmp_x = pad(preproc_aa, preproc_dna.shape[1])
 tmp_x = tmp_x.reshape((-1, preproc_dna.shape[-2]))
 
-# tmp_y = pad(preproc_dna[1:], preproc_dna.shape[1])
-
-# x_pred = pad(preproc_aa[0], preproc_dna.shape[1])
-# x_pred = x_pred.reshape((-1, preproc_dna.shape[-2]))
-
+# Make RNN model as defined previously, and using dimensions of AA, DNA vectors
 my_model = model_embed(tmp_x.shape, preproc_dna.shape[1], len(aa_tokenizer.word_index)+1, len(dna_tokenizer.word_index)+1)
 
+# Show the model parameters
 my_model.summary()
 
-callbacks = [EarlyStopping(monitor='val_loss', patience=2), ModelCheckpoint('keras_model_combined.h5')]
+# Allow for early stopping if the loss plateus, and export the newest model each epoch
+callbacks = [EarlyStopping(monitor='val_loss', patience=5), ModelCheckpoint('rnn_model_newest.h5')]
 
-my_model.fit(tmp_x, preproc_dna, batch_size=2, epochs=10, validation_split=0.2, callbacks=callbacks)
+# Fit the RNN model to DNA, AA sequences, and store the history of loss/accuracy
+hist = my_model.fit(tmp_x, preproc_dna, batch_size=16, epochs=10, validation_split=0.2, callbacks=callbacks)
 
-print(logits_to_text(my_model.predict(tmp_x[:1])[0], dna_tokenizer))
+# Save the model for use in prediction, evaluation
+my_model.save('rnn_model.h5')
 
-my_model.save('keras_model_combined_final.h5')
-
+# Also export the history of loss/accuracy
+with open('rnn_history','wb') as f:
+    pickle.dump(hist.history, f)
