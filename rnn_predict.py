@@ -13,7 +13,7 @@ import json
 
 from keras.preprocessing.text import tokenizer_from_json
 from keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
+from keras.models import load_model
 
 # Set working directory and place trained model and tokenizers here
 os.chdir('/mnt/c/RNN/')
