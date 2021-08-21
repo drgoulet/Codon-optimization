@@ -12,7 +12,7 @@ Packages required:
 
 Codon optimization procedure
 
-Place the following in the same directory:
+1) Place the following in the same directory:
 - rnn_predict.py
 - rnn_model.h5
 - dna_tokenizer.json
@@ -22,3 +22,6 @@ Place the following in the same directory:
   - Single-letter amino acid abbreviations, no spaces
   - No stop codon (will be added to output DNA sequence)
 
+2) Change the following in rnn_predict.py:
+  - Set working directory as the one containing the above files
+  - Update the name of the input amino acid 
