@@ -3,7 +3,7 @@
 # Based on Chinese hamster DNA and AA sequences
 # Inputs: Trained RNN model (.h5), DNA and AA tokenizers (.json), and AA sequence to optimize (.txt)
 # Formatting of AA sequence: Single-letter abbreviations, no spaces, no stop codon (this is added), include signal peptide
-# Export: predicted/optimized DNA sequence (.txt)
+# Output: predicted/optimized DNA sequence (.txt)
 # Dennis R. Goulet
 # First upload to Github: 03 July 2020
 
