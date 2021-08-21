@@ -7,6 +7,10 @@ Packages required:
 - Python (built using Python 3.7.4 via Ubuntu-18.04)
 - Keras (tensorflow)
 - json
+- NumPy
+- OS
+
+Codon optimization procedure
 
 Place the following in the same directory:
 - rnn_predict.py
