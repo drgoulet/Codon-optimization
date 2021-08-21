@@ -17,7 +17,7 @@ Codon optimization procedure:
 - dna_tokenizer.json
 - aa_tokenizer.json
 - Text file containing amino acid sequence (save as "sequence.txt")
-  - Single-letter amino acid abbreviations, no spaces, no newlines
+  - Single-letter amino acid abbreviations
   - Signal peptide included, if applicable
   - No stop codon (will be added to output DNA sequence)
 
