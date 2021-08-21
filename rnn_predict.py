@@ -20,7 +20,7 @@ os.chdir('/mnt/c/RNN/')
 
 # Place text file with AA sequence to be optimized in working directory
 # Set the name of the text file here:
-dna_seq = "pdl1"
+aa_seq = "sequence"
 
 # Encrypt the amino acid sequence
 def encrypt(string,length):
@@ -42,8 +42,8 @@ def logits_to_text(logits, tokenizer):
     return ' '.join([index_to_words[prediction] for prediction in np.argmax(logits, 1)])
 
 # Import sequence to optimize/predict from text file
-dna_seq_file = dna_seq + ".txt"
-with open(dna_seq_file) as f:
+aa_seq_file = aa_seq + ".txt"
+with open(aa_seq_file) as f:
     aa_item = f.read()
 
 # Import trained model as .h5    
@@ -87,5 +87,5 @@ print("Optimized DNA sequence:")
 print(seq_opt_final)
 
 # Export optimized/predicted DNA sequence as text file
-with open(dna_seq+"_opt.txt", "w") as f:
+with open(aa_seq+"_opt.txt", "w") as f:
     print(seq_opt_final, file=f)
