@@ -59,7 +59,12 @@ with open('dna_tokenizer.json') as f:
 dna_tokenizer = tokenizer_from_json(dna_json)
 
 # Add stop codon identifier and calculate length of input sequence
+# Also remove any extra spaces, tabs, newlines
 aa_item_with_stop = aa_item + 'Z'
+aa_item_with_stop = aa_item_with_stop.replace(" ","")
+aa_item_with_stop = aa_item_with_stop.replace("\n","")
+aa_item_with_stop = aa_item_with_stop.replace("\r","")
+aa_item_with_stop = aa_item_with_stop.replace("\t","")
 aa_list = [aa_item_with_stop]
 seq_len = len(aa_item_with_stop)
 
