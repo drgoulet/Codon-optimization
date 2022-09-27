@@ -1,8 +1,6 @@
 # Codon-optimization
 Use machine learning to design codon-optimized DNA sequences for increased protein expression in CHO cells.
 
-To predict the 'best' DNA sequence for a given amino acid sequence using the pre-trained model, use rnn_predict.py.
-
 Description of project:
 https://www.liebertpub.com/doi/10.1089/cmb.2021.0458
 
@@ -12,6 +10,8 @@ Packages required:
 - json
 - NumPy
 - OS
+
+To predict the 'best' DNA sequence for a given amino acid sequence using the pre-trained model, use rnn_predict.py.
 
 Codon optimization procedure:
 1) Place the following in the same directory:
