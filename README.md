@@ -3,6 +3,9 @@ Use machine learning to design codon-optimized DNA sequences for increased prote
 
 To predict the 'best' DNA sequence for a given amino acid sequence using the pre-trained model, use rnn_predict.py.
 
+Description of project:
+https://www.liebertpub.com/doi/10.1089/cmb.2021.0458
+
 Packages required:
 - Python (built using Python 3.7.4 via Ubuntu-18.04)
 - Keras (tensorflow)
